@@ -1,0 +1,89 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block title %}Home{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h2 class="mb-4 fw-bold text-gradient">Explore Profiles</h2>
+
+    {% if users %}
+    <div class="row">
+        {% for user in users %}
+        <div class="col-md-4 mb-4">
+            <div class="card glass-card shadow-sm border-0">
+                <div class="card-body text-center">
+                    {% if user.profile_image %}
+                    <img src="{{ user.profile_image.url }}" class="rounded-circle mb-3 border border-3"
+                        width="90" height="90" style="object-fit: cover;">
+                    {% endif %}
+                    <h5 class="card-title mb-1">
+                        <a href="{% url 'public_profile' user.id %}" class="text-decoration-none text-dark fw-bold">
+                            @{{ user.name }}
+                        </a>
+                    </h5>
+                    <p class="text-muted mb-3 small">{{ user.bio|default:"No bio added yet." }}</p>
+
+                    <form method="post" action="{% url 'toggle_follow' user.id %}">
+                        {% csrf_token %}
+                        {% if user in current_user.following.all %}
+                        <button type="submit" class="btn btn-danger btn-sm rounded-pill px-4">Unfollow</button>
+                        {% else %}
+                        <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4">Follow</button>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-center text-muted">No users found.</p>
+    {% endif %}
+
+    <hr class="my-5">
+
+    <h2 class="mt-5 mb-4 fw-bold text-gradient">Explore Dox</h2>
+    <div class="row">
+        {% for doc in documents %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 glass-card shadow-sm border-0">
+                {% if doc.thumbnail %}
+                <img src="{{ doc.thumbnail.url }}" class="card-img-top" alt="{{ doc.title }}"
+                    style="height: 200px; object-fit: cover; border-top-left-radius: 15px; border-top-right-radius: 15px;">
+                {% else %}
+                <img src="{% static 'dashboard/image/default_thumbnail.png' %}" class="card-img-top" alt="No Preview"
+                    style="height: 200px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold">{{ doc.title }}</h5>
+                    <p class="card-text small text-muted">{{ doc.description|default:"No description." }}</p>
+                    <a href="{% url 'public_profile' doc.user.id %}" class="text-decoration-none fw-semibold text-primary">
+                        @{{ doc.user.name }}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .glass-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .glass-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .text-gradient {
+        background: linear-gradient(to right, #1e88e5, #6a1b9a);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+</style>
+{% endblock %}
