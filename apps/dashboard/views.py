@@ -1,3 +1,4 @@
+# paradox
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.core.mail import send_mail
@@ -10,7 +11,8 @@ import random
 import os
 from pdf2image import convert_from_path
 
-from .models import User, Post, Document
+from django.shortcuts import redirect
+from .models import User, Post, Document, Comment
 from .helpers import is_email_verified, is_valid_mobile_number, is_valid_password, generate_username_suggestions
 
 # ================================
@@ -28,6 +30,30 @@ def login_required(view_func):
 # ================================
 # AUTHENTICATION VIEWS
 # ================================
+
+
+
+
+@login_required
+
+def toggle_like(request, doc_id):
+    if request.method == 'POST':
+        doc = get_object_or_404(Document, id=doc_id)
+        user = get_current_user(request)  # Your session/user logic
+        if user in doc.likes.all():
+            doc.likes.remove(user)
+        else:
+            doc.likes.add(user)
+        return redirect(request.POST.get('next', 'index'))
+
+@login_required
+def add_comment(request, doc_id):
+    if request.method == 'POST':
+        doc = get_object_or_404(Document, id=doc_id)
+        user = get_current_user(request)
+        Comment.objects.create(user=user, document=doc, text=request.POST['comment'])
+        return redirect(request.POST.get('next', 'index'))
+
 
 def sign_in(request):
     if request.method == 'POST':
@@ -101,6 +127,7 @@ def sign_up(request):
     return render(request, 'dashboard/sign_up.html')
 
 def email_verify(request):
+    
     if request.method == 'POST':
         email_ = request.POST['email']
         otp_ = request.POST['otp']
@@ -120,14 +147,62 @@ def email_verify(request):
 
     return render(request, 'dashboard/email_verify.html')
 
+def forgot_password(request):
+    if request.method == 'POST':
+        email = request.POST['email']
+
+        # Send a simple reset link
+        subject = 'Reset Your Password'
+        # Correct URL path
+        message = 'Click here to reset your password: http://127.0.0.1:8000/reset_password/'
+        from_email = settings.EMAIL_HOST_USER
+        recipient_list = [email]
+
+        send_mail(subject, message, from_email, recipient_list)
+
+        return render(request, 'dashboard/forgot_password.html', {
+            'message': 'We sent a reset link to your email!'
+        })
+
+    return render(request, 'dashboard/forgot_password.html')
+
+
+def reset_password(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')  # optional, see note below
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        if new_password == confirm_password:
+            try:
+                user_obj = User.objects.get(email=email)
+                user_obj.password = make_password(new_password)
+                user_obj.save()
+                messages.success(request, "Password reset successful.")
+                return redirect('sign_in')
+            except User.DoesNotExist:
+                messages.error(request, "No user found with this email.")
+        else:
+            messages.error(request, "Passwords do not match.")
+
+    return render(request, 'dashboard/reset_password.html')
+
+
+ 
+def analytics(request):
+    return render(request,'dashboard/analytics.html')
+
 def logout(request):
     user = User.objects.get(id=request.session['user_id']) 
     messages.success(request, f"{user.name}, you have successfully logged out from ParaDox. Keep Learning! ✌️🤞", extra_tags='logout')
     del request.session['user_id']
     return redirect('sign_in')
 
-def forgot_password(request):
-    return render(request, 'dashboard/forgot_password.html')
+# views.py
+
+
+
+
 
 # ================================
 # DASHBOARD VIEWS

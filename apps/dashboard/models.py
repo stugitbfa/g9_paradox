@@ -1,6 +1,7 @@
 
 from django.db import models
 from django.contrib.auth.models import User
+# from django.templatetags.static import static
 
 
 # Create your models here.
@@ -21,7 +22,11 @@ class User(models.Model):
     is_active = models.BooleanField(default=False)
     followers = models.ManyToManyField('self', symmetrical=False, related_name='following', blank=True)
     bio = models.TextField(blank=True, null=True)
-    profile_image = models.ImageField(upload_to='profile_images/',default="images\default-profile-icon.jpg", blank=True, null=True)
+    profile_image = models.ImageField(upload_to='profile_images/',blank=True, null=True)
+    
+    from django.db import models
+
+
     
 # ✅ Document model for file upload
 class Document(models.Model):
@@ -32,6 +37,15 @@ class Document(models.Model):
     file = models.FileField(upload_to='documents/')
     thumbnail = models.ImageField(upload_to='thumbnails/', blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    likes = models.ManyToManyField('User', related_name='liked_docs', blank=True)  # 👍 Like feature
+    
+    
+class Comment(models.Model):
+    document = models.ForeignKey(Document, related_name='comments', on_delete=models.CASCADE)
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    
 
     def __str__(self):
         return self.file.name

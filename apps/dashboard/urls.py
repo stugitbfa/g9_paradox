@@ -17,9 +17,15 @@ urlpatterns = [
     path('edit-profile/', views.edit_profile, name='edit_profile'),
     path('delete-document/<int:doc_id>/', views.delete_document, name='delete_document'),
     path('email_verify/', views.email_verify, name='email_verify'),
+    path('forgot_password/', views.forgot_password, name='forgot_password'),
+    path('reset_password/', views.reset_password, name='reset_password'),
+    path('reset-password/', views.reset_password, name='reset_password'),
+    path('like/<int:doc_id>/', views.toggle_like, name='toggle_like'),
+    path('comment/<int:doc_id>/', views.add_comment, name='add_comment'),
     path('explore/', views.explore, name='explore'),
     path('follow/<int:user_id>/', views.toggle_follow, name='toggle_follow'),
     path('logout/',views.logout,name='logout'),
     
 
 ]
+

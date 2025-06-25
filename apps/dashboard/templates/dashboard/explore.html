@@ -15,13 +15,15 @@
     letter-spacing: 0.5px;
   }
 
-  .user-card, .doc-card {
+  .user-card,
+  .doc-card {
     border-radius: 1rem;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
     transition: transform 0.2s ease;
   }
 
-  .user-card:hover, .doc-card:hover {
+  .user-card:hover,
+  .doc-card:hover {
     transform: scale(1.02);
   }
 
@@ -38,6 +40,17 @@
   .text-purple {
     color: #6a1b9a;
   }
+
+  .comment-box {
+    background: #f9f9fb;
+    border-radius: 6px;
+    padding: 5px 10px;
+    margin-bottom: 5px;
+  }
+
+  .comment-box strong {
+    color: #4a148c;
+  }
 </style>
 
 <div class="container mt-5 mb-5">
@@ -49,7 +62,11 @@
     <div class="col-md-3 mb-4">
       <div class="card text-center user-card border-0">
         <div class="card-body">
+          {% if user.profile_image and user.profile_image.name %}
           <img src="{{ user.profile_image.url }}" class="rounded-circle mb-2" width="80" height="80" style="object-fit: cover;">
+          {% else %}
+          <img src="{% static 'dashboard/images/default-profile-icon.jpg' %}" class="rounded-circle mb-2" width="80" height="80" style="object-fit: cover;">
+          {% endif %}
           <h6 class="fw-bold mb-1 text-purple">@{{ user.name }}</h6>
           <p class="text-muted small">{{ user.bio|default:"No bio yet." }}</p>
           <a href="{% url 'public_profile' user.id %}" class="btn btn-sm user-btn rounded-pill mt-2">View Profile</a>
@@ -66,16 +83,44 @@
   <div class="row">
     {% for doc in documents %}
     <div class="col-md-4 mb-4">
-      <div class="card text-center border border-dark shadow-sm" style="border-radius: 12px;">
+      <div class="card text-center doc-card border border-dark shadow-sm">
         {% if doc.thumbnail %}
         <img src="{{ doc.thumbnail.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
         {% else %}
-        <img src="{% static 'dashboard/image/default_thumbnail.png' %}" class="card-img-top" style="height: 200px; object-fit: cover;">
+        <img src="{% static 'dashboard/images/default_thumbnail.png' %}" class="card-img-top" style="height: 200px; object-fit: cover;">
         {% endif %}
         <div class="card-body">
           <h5 class="card-title text-purple">{{ doc.title }}</h5>
           <p class="card-text">{{ doc.description|default:"No description." }}</p>
           <a href="{% url 'public_profile' doc.user.id %}" class="text-decoration-none text-purple">@{{ doc.user.name }}</a>
+
+          <!-- Like Button -->
+          <form method="post" action="{% url 'toggle_like' doc.id %}">
+            {% csrf_token %}
+            {% if current_user in doc.likes.all %}
+            <input type="hidden" name="next" value="{% url 'explore' %}">
+            <button class="btn btn-sm btn-danger mt-2">Unlike ({{ doc.likes.count }})</button>
+            {% else %}
+            <button class="btn btn-sm btn-outline-primary mt-2">Like ({{ doc.likes.count }})</button>
+            {% endif %}
+          </form>
+
+          <!-- Comment Form -->
+          <form method="post" action="{% url 'add_comment' doc.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{% url 'explore' %}">
+            <input type="text" name="comment" class="form-control form-control-sm mt-2" placeholder="Add a comment..." required>
+          </form>
+
+          <!-- Show Comments -->
+          <div class="mt-2">
+            {% for comment in doc.comments.all %}
+            <div class="comment-box small">
+              <strong>@{{ comment.user.name }}</strong>: {{ comment.text }}
+              <span class="text-muted small">({{ comment.created_at|date:"M d H:i" }})</span>
+            </div>
+            {% endfor %}
+          </div>
         </div>
       </div>
     </div>
