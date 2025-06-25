@@ -14,10 +14,23 @@ from pdf2image import convert_from_path
 from django.shortcuts import redirect
 from .models import User, Post, Document, Comment
 from .helpers import is_email_verified, is_valid_mobile_number, is_valid_password, generate_username_suggestions
+from .models import User
 
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Document, Comment
+from .context_processors import current_user  # If you're using this manually
 # ================================
 # CUSTOM DECORATOR
 # ================================
+
+from django.core.serializers.json import DjangoJSONEncoder
+from django.http import JsonResponse
+import json
+
+# In your context (for index or explore view)
+
 
 def login_required(view_func):
     @wraps(view_func)
@@ -35,24 +48,24 @@ def login_required(view_func):
 
 
 @login_required
-
 def toggle_like(request, doc_id):
     if request.method == 'POST':
         doc = get_object_or_404(Document, id=doc_id)
-        user = get_current_user(request)  # Your session/user logic
+        user = current_user(request).get('current_user')  # ✅ extract user
         if user in doc.likes.all():
             doc.likes.remove(user)
         else:
             doc.likes.add(user)
-        return redirect(request.POST.get('next', 'index'))
+        return redirect(request.POST.get('next', 'explore'))
+
 
 @login_required
 def add_comment(request, doc_id):
     if request.method == 'POST':
         doc = get_object_or_404(Document, id=doc_id)
-        user = get_current_user(request)
+        user = current_user(request).get('current_user')  # ✅ extract user
         Comment.objects.create(user=user, document=doc, text=request.POST['comment'])
-        return redirect(request.POST.get('next', 'index'))
+        return redirect(request.POST.get('next', 'explore'))
 
 
 def sign_in(request):
@@ -220,13 +233,22 @@ def index(request):
     random.shuffle(users)
     random.shuffle(documents)
 
+    for doc in documents:
+        doc.comment_data = json.dumps([
+            {
+                "user": c.user.name,
+                "text": c.text,
+                "created_at": c.created_at.strftime("%b %d %H:%M")
+            }
+            for c in doc.comments.all()
+        ], cls=DjangoJSONEncoder)
+
     return render(request, 'dashboard/index.html', {
         'users': users[:10],
         'documents': documents[:10],
         'query': query,
         'current_user': current_user
     })
-
 @login_required
 def explore(request):
     user_id = request.session.get('user_id')

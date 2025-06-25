@@ -6,7 +6,7 @@
 {% block body %}
 <div class="container py-5">
 
-  <!-- ParaDox Header -->
+  <!-- Header -->
   <div class="text-center mb-5">
     <h2 class="fw-bold" style="background: linear-gradient(to right, #6a1b9a, #9c27b0); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
       ParaDox User Profile
@@ -15,11 +15,16 @@
 
   <!-- Profile Image -->
   <div class="text-center mb-3">
+    {% if user_profile.profile_image and user_profile.profile_image.name %}
     <img src="{{ user_profile.profile_image.url }}" alt="Profile Image" class="rounded-circle shadow"
-         style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #6a1b9a;">
+      style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #6a1b9a;">
+    {% else %}
+    <img src="{% static 'dashboard/images/default-profile-icon.jpg' %}" alt="Default Image" class="rounded-circle shadow"
+      style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #6a1b9a;">
+    {% endif %}
   </div>
 
-  <!-- Username -->
+  <!-- User Info -->
   <h2 class="text-center text-purple">@{{ user_profile.name }}</h2>
   <p class="fw-semibold text-center">{{ user_profile.bio|default:"This user has not added a bio yet." }}</p>
   <p class="text-muted text-center">{{ user_profile.email }}</p>
@@ -59,7 +64,11 @@
         <div class="modal-body">
           {% for f in followers %}
           <a href="{% url 'public_profile' f.id %}" class="d-flex align-items-center text-decoration-none text-dark mb-3">
+            {% if f.profile_image and f.profile_image.name %}
             <img src="{{ f.profile_image.url }}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
+            {% else %}
+            <img src="{% static 'dashboard/images/default-profile-icon.jpg' %}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
+            {% endif %}
             <div>
               <strong>@{{ f.name }}</strong><br>
               <small class="text-muted">{{ f.bio|default:"No bio" }}</small>
@@ -84,7 +93,11 @@
         <div class="modal-body">
           {% for f in following %}
           <a href="{% url 'public_profile' f.id %}" class="d-flex align-items-center text-decoration-none text-dark mb-3">
+            {% if f.profile_image and f.profile_image.name %}
             <img src="{{ f.profile_image.url }}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
+            {% else %}
+            <img src="{% static 'dashboard/images/default-profile-icon.jpg' %}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
+            {% endif %}
             <div>
               <strong>@{{ f.name }}</strong><br>
               <small class="text-muted">{{ f.bio|default:"No bio" }}</small>
@@ -98,9 +111,8 @@
     </div>
   </div>
 
-  <hr class="my-5">
-
   <!-- Uploaded Documents -->
+  <hr class="my-5">
   <h4 class="text-secondary fw-bold mb-4">Uploaded Documents</h4>
   {% if documents %}
   <div class="row">
@@ -110,7 +122,7 @@
         {% if doc.thumbnail %}
         <img src="{{ doc.thumbnail.url }}" class="card-img-top rounded-top-3" style="height: 200px; object-fit: cover;">
         {% else %}
-        <img src="{% static 'dashboard/image/default_thumbnail.png' %}" class="card-img-top rounded-top-3" style="height: 200px; object-fit: cover;">
+        <img src="{% static 'dashboard/images/default_thumbnail.png' %}" class="card-img-top rounded-top-3" style="height: 200px; object-fit: cover;">
         {% endif %}
         <div class="card-body">
           <h5 class="card-title">{{ doc.title }}</h5>
