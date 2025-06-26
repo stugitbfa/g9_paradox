@@ -70,8 +70,12 @@
   }
 
   #commentList {
-    max-height: 200px;
+    max-height: 250px;
     overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
   }
 </style>
 
@@ -82,7 +86,6 @@
     {% for doc in documents %}
     <div class="col-md-4 mb-4 d-flex">
       <div class="card doc-card w-100">
-        <!-- Thumbnail with modal trigger -->
         <img src="{% if doc.thumbnail %}{{ doc.thumbnail.url }}{% else %}{% static 'dashboard/images/default-thumbnail.png' %}{% endif %}"
              class="card-img-top doc-trigger"
              data-id="{{ doc.id }}"
@@ -92,30 +95,15 @@
              data-user="{{ doc.user.name|escapejs }}"
              data-comments='[{% for c in doc.comments.all %}{"user": "{{ c.user.name|escapejs }}", "text": "{{ c.text|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'>
 
-        <!-- Info -->
         <div class="card-body d-flex flex-column">
           <h5 class="card-title text-purple">{{ doc.title }}</h5>
           <p class="card-text">{{ doc.description|default:"No description." }}</p>
           <a href="{% url 'public_profile' doc.user.id %}" class="text-decoration-none fw-semibold text-purple mb-2 d-block">
             @{{ doc.user.name }}
           </a>
-
-          <!-- Comment Form -->
-          <form method="post" action="{% url 'add_comment' doc.id %}">
-            {% csrf_token %}
-            <input type="hidden" name="next" value="{% url 'explore_docs' %}">
-            <input type="text" name="comment" class="form-control form-control-sm mb-2" placeholder="Add a comment..." required>
-          </form>
-
-          <!-- Show Comments -->
-          <div>
-            {% for comment in doc.comments.all %}
-            <div class="comment-box">
-              <strong>@{{ comment.user.name }}</strong>: {{ comment.text }}<br>
-              <span class="text-muted">{{ comment.created_at|date:"M d H:i" }}</span>
-            </div>
-            {% endfor %}
-          </div>
+          <a href="{{ doc.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary mt-auto w-100">
+            📄 View Document
+          </a>
         </div>
       </div>
     </div>
@@ -132,21 +120,24 @@
         <div class="col-md-8">
           <iframe id="docViewer" width="100%" height="500px" style="border-radius: 10px; border: none;"></iframe>
         </div>
+
         <!-- Metadata & Comments -->
         <div class="col-md-4 ps-3 d-flex flex-column justify-content-between">
           <div>
             <h5 id="docTitle" class="text-purple fw-bold"></h5>
             <p id="docDesc" class="text-muted small"></p>
             <p id="docUser" class="fw-semibold"></p>
+
+            <!-- Comments Scrollable -->
+            <div id="commentList" class="mt-3 small"></div>
           </div>
-          <div>
-            <form id="commentForm" method="post">
-              {% csrf_token %}
-              <input type="text" name="comment" class="form-control form-control-sm mb-2" placeholder="Add a comment..." required>
-              <button type="submit" class="btn btn-sm btn-secondary">Post</button>
-            </form>
-            <div id="commentList" class="mt-2 small"></div>
-          </div>
+
+          <!-- Add Comment -->
+          <form id="commentForm" method="post">
+            {% csrf_token %}
+            <input type="text" name="comment" class="form-control form-control-sm mb-2" placeholder="Add a comment..." required>
+            <button type="submit" class="btn btn-sm btn-secondary">Post</button>
+          </form>
         </div>
       </div>
     </div>
@@ -154,7 +145,6 @@
 </div>
 
 <script>
-  // Trigger PDF modal
   document.querySelectorAll('.doc-trigger').forEach(el => {
     el.addEventListener('click', () => {
       const data = {
@@ -181,12 +171,15 @@
 
     const commentsDiv = document.getElementById('commentList');
     commentsDiv.innerHTML = "";
+
     data.comments.forEach(c => {
-      commentsDiv.innerHTML += `<div><strong>@${c.user}</strong>: ${c.text}</div>`;
+      commentsDiv.innerHTML += `
+        <div class="comment-box">
+          <strong>@${c.user}</strong>: ${c.text}
+        </div>`;
     });
 
-    const modal = new bootstrap.Modal(document.getElementById('docModal'));
-    modal.show();
+    new bootstrap.Modal(document.getElementById('docModal')).show();
   }
 </script>
 {% endblock %}

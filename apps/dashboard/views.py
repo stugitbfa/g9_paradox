@@ -66,7 +66,7 @@ def add_comment(request, doc_id):
         # ✅ Create comment
         Comment.objects.create(user=user, document=doc, text=request.POST['comment'])
 
-        return redirect(request.POST.get('next', 'index'))
+        return redirect(request.POST.get('next', 'explore_docs'))
 
 
 def sign_in(request):
