@@ -37,7 +37,6 @@ class Document(models.Model):
     file = models.FileField(upload_to='documents/')
     thumbnail = models.ImageField(upload_to='thumbnails/', blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    likes = models.ManyToManyField('User', related_name='liked_docs', blank=True)  # 👍 Like feature
     
     
 class Comment(models.Model):

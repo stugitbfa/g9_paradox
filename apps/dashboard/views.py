@@ -27,6 +27,7 @@ from .context_processors import current_user  # If you're using this manually
 
 from django.core.serializers.json import DjangoJSONEncoder
 import json
+from django.http import JsonResponse
 
 # In your context (for index or explore view)
 
@@ -46,25 +47,26 @@ def login_required(view_func):
 
 
 
-@login_required
-def toggle_like(request, doc_id):
-    if request.method == 'POST':
-        doc = get_object_or_404(Document, id=doc_id)
-        user = current_user(request).get('current_user')  # ✅ extract user
-        if user in doc.likes.all():
-            doc.likes.remove(user)
-        else:
-            doc.likes.add(user)
-        return redirect(request.POST.get('next', 'explore'))
+
+
 
 
 @login_required
 def add_comment(request, doc_id):
     if request.method == 'POST':
         doc = get_object_or_404(Document, id=doc_id)
-        user = current_user(request).get('current_user')  # ✅ extract user
+        
+        # ✅ Get user object from session manually
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return redirect('login')  # or show error
+
+        user = User.objects.get(id=user_id)
+
+        # ✅ Create comment
         Comment.objects.create(user=user, document=doc, text=request.POST['comment'])
-        return redirect(request.POST.get('next', 'explore'))
+
+        return redirect(request.POST.get('next', 'index'))
 
 
 def sign_in(request):
@@ -253,7 +255,7 @@ def index(request):
         'current_user': current_user
     })
 @login_required
-def explore(request):
+def explore_profile(request):
     user_id = request.session.get('user_id')
     current_user = User.objects.get(id=user_id)
 
@@ -263,12 +265,31 @@ def explore(request):
     random.shuffle(users)
     random.shuffle(documents)
 
-    return render(request, 'dashboard/explore.html', {
+    return render(request, 'dashboard/explore_profile.html', {
         'users': users,
         'documents': documents,
         'current_user': current_user
     })
 
+
+@login_required
+def explore_docs(request):
+    user_id = request.session.get('user_id')
+    current_user = User.objects.get(id=user_id)
+
+    users = list(User.objects.exclude(id=user_id))
+    documents = list(Document.objects.all())
+
+    random.shuffle(users)
+    random.shuffle(documents)
+
+    return render(request, 'dashboard/explore_docs.html', {
+        'users': users,
+        'documents': documents,
+        'current_user': current_user
+    })
+    
+    
 @login_required
 def profile(request):
     user = User.objects.get(id=request.session['user_id'])

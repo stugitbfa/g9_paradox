@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{ user.name }} | ParaDox Profile</title>
 
-  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
@@ -17,38 +16,31 @@
       font-family: 'Segoe UI', sans-serif;
     }
 
-    .container {
-      backdrop-filter: blur(8px);
-    }
-
     .glass {
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.95);
       border-radius: 20px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
     }
 
-    .profile-img {
-      width: 80px;
-      height: 80px;
+    .profile-img-lg {
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
       object-fit: cover;
-      border: 2px solid #6a1b9a;
+      border: 4px solid #6a1b9a;
+      margin-right: 1rem;
     }
 
     .text-gradient {
-      background: linear-gradient(to right, #1e88e5, #6a1b9a);
+      background: linear-gradient(to right, #1354df, #6a1b9a);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
-    .modal-backdrop {
-      display: none !important;
-    }
-
-    .modal-content {
-      background: #ffffff;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    .btn-outline-danger:hover {
+      background-color: #e53935;
+      color: white;
     }
 
     .doc-preview {
@@ -57,19 +49,14 @@
       object-fit: contain;
     }
 
-    .btn-primary {
-      background-color: #6a1b9a;
-      border-color: #6a1b9a;
+    .modal-content {
+      border-radius: 16px;
     }
 
-    .btn-outline-danger {
-      border-color: #e53935;
-      color: #e53935;
-    }
-
-    .btn-outline-danger:hover {
-      background-color: #e53935;
-      color: white;
+    .rounded-section {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 1rem;
     }
   </style>
 </head>
@@ -77,7 +64,7 @@
 <body>
   <div class="container py-5">
     <div class="row justify-content-center">
-      <div class="col-lg-10 p-4 glass">
+      <div class="col-lg-10 glass">
 
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -88,19 +75,17 @@
         </div>
 
         <!-- Profile Info -->
-        <div class="d-flex align-items-center mb-3">
-           {% if user.profile_image and 'default-profile-icon.jpg' not in user.profile_image.url %}
-  <img src="{{ user.profile_image.url }}" alt="Profile" class="ms-2"
-       style="width: 45px; height: 45px; object-fit: cover; border-radius: 50%; border: 2px solid gold;">
-{% else %}
-  <img src="{% static 'images/default-profile-icon.jpg' %}" alt="Default" class="ms-2"
-       style="width: 45px; height: 45px; object-fit: cover; border-radius: 50%; border: 2px solid gold;">
-{% endif %}
+        <div class="d-flex align-items-center mb-4">
+          {% if user.profile_image and 'default-profile-icon.jpg' not in user.profile_image.url %}
+            <img src="{{ user.profile_image.url }}" class="profile-img-lg shadow-sm" alt="Profile">
+          {% else %}
+            <img src="{% static 'dashboard/images/default-profile-icon.jpg' %}" class="profile-img-lg shadow-sm" alt="Default">
+          {% endif %}
           <div>
-            <h4 class="fw-bold text-primary mb-0">@{{ user.name }}</h4>
+            <h4 class="fw-bold text-primary mb-1">@{{ user.name }}</h4>
             <p class="text-muted mb-1">{{ user.bio|default:"No bio yet." }}</p>
-            <small>{{ user.email }}</small>
-            <div class="d-flex gap-3 mt-2 small">
+            <small class="text-secondary">{{ user.email }}</small>
+            <div class="d-flex gap-4 mt-2 small">
               <a href="#" data-bs-toggle="modal" data-bs-target="#followersModal" class="text-decoration-none">
                 <strong>{{ followers_count }}</strong> Followers
               </a>
@@ -111,11 +96,12 @@
           </div>
         </div>
 
-        <div class="d-flex gap-2 mb-3">
-          <a href="{% url 'edit_profile' %}" class="btn btn-sm btn-primary">Edit Profile</a>
+        <!-- Buttons -->
+        <div class="mb-4 d-flex gap-3">
+          <a href="{% url 'edit_profile' %}" class="btn btn-primary btn-sm">Edit Profile</a>
           <form method="POST" action="{% url 'logout' %}">
             {% csrf_token %}
-            <button class="btn btn-sm btn-outline-danger">Logout</button>
+            <button class="btn btn-outline-danger btn-sm">Logout</button>
           </form>
         </div>
 
@@ -132,14 +118,13 @@
             </div>
             <div class="mb-3">
               <label for="description" class="form-label">Description</label>
-              <textarea name="description" class="form-control" id="description" rows="3"
-                placeholder="Write about the document..."></textarea>
+              <textarea name="description" class="form-control" rows="3" placeholder="Write about the document..."></textarea>
             </div>
             <div class="mb-3">
               <label for="formFile" class="form-label">Upload File</label>
               <input type="file" name="document" class="form-control" id="formFile" required>
             </div>
-            <button type="submit" class="btn btn-sm btn-primary">Upload Dox</button>
+            <button type="submit" class="btn btn-primary btn-sm">Upload Dox</button>
           </form>
         </div>
 
@@ -148,31 +133,31 @@
         <!-- Uploaded Documents -->
         <h5 class="fw-semibold text-secondary mb-3">Your Documents</h5>
         {% if uploaded_docs %}
-        {% for doc in uploaded_docs %}
-        <div class="bg-light p-3 rounded-3 d-flex justify-content-between align-items-center mb-3">
-          <div>
-            <h6 class="mb-1">{{ doc.title }}</h6>
-            {% if doc.thumbnail %}
-            <img src="{{ doc.thumbnail.url }}" alt="Preview" class="doc-preview mb-1">
-            {% else %}
-            <img src="{% static 'default_thumbnail.png' %}" alt="Preview" class="doc-preview mb-1">
-            {% endif %}
-            <br>
-            <a href="{{ doc.file.url }}" target="_blank">{{ doc.file.name|slice:"10:" }}</a><br>
-            <small class="text-muted">Uploaded {{ doc.uploaded_at|date:"d M Y, H:i" }}</small><br>
-            <small class="text-secondary">{{ doc.description }}</small>
+          {% for doc in uploaded_docs %}
+          <div class="rounded-section mb-3 d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">{{ doc.title }}</h6>
+              {% if doc.thumbnail %}
+              <img src="{{ doc.thumbnail.url }}" alt="Preview" class="doc-preview mb-1">
+              {% else %}
+              <img src="{% static 'dashboard/images/default-thumbnail.png' %}" alt="Preview" class="doc-preview mb-1">
+              {% endif %}
+              <br>
+              <a href="{{ doc.file.url }}" target="_blank">{{ doc.file.name|slice:"10:" }}</a><br>
+              <small class="text-muted">Uploaded {{ doc.uploaded_at|date:"d M Y, H:i" }}</small><br>
+              <small class="text-secondary">{{ doc.description }}</small>
+            </div>
+            <div class="d-flex gap-2">
+              <a href="{% url 'update_document' doc.id %}" class="btn btn-sm btn-primary">Edit</a>
+              <form method="POST" action="{% url 'delete_document' doc.id %}">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+            </div>
           </div>
-          <div class="d-flex gap-2">
-            <a href="{% url 'update_document' doc.id %}" class="btn btn-sm btn-primary">Edit</a>
-            <form method="POST" action="{% url 'delete_document' doc.id %}">
-              {% csrf_token %}
-              <button class="btn btn-sm btn-outline-danger">Delete</button>
-            </form>
-          </div>
-        </div>
-        {% endfor %}
+          {% endfor %}
         {% else %}
-        <p class="text-muted">You haven't uploaded any documents yet.</p>
+          <p class="text-muted">You haven't uploaded any documents yet.</p>
         {% endif %}
 
         <hr>
@@ -183,21 +168,18 @@
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title">{{ user.name }}'s Followers</h5>
-                <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
               </div>
               <div class="modal-body">
                 {% if followers %}
                 <ul class="list-group">
                   {% for f in followers %}
-                  <li class="list-group-item d-flex gap-3 align-items-center">
-                    <a href="{% url 'public_profile' f.id %}">
-                      {% if f.profile_image %}
-                      <img src="{{ f.profile_image.url }}" width="40" height="40" class="rounded-circle"
-                        style="object-fit: cover;">
-                      {% else %}
-                      <img src="{% static 'images/default-profile-icon.jpg' %}" width="40" height="40" class="rounded-circle">
-                      {% endif %}
-                    </a>
+                  <li class="list-group-item d-flex align-items-center gap-3">
+                    {% if f.profile_image %}
+                      <img src="{{ f.profile_image.url }}" width="40" height="40" class="rounded-circle" style="object-fit: cover;">
+                    {% else %}
+                      <img src="{% static 'dashboard/images/default-profile-icon.jpg' %}" width="40" height="40" class="rounded-circle">
+                    {% endif %}
                     <div>
                       <a href="{% url 'public_profile' f.id %}" class="fw-bold text-decoration-none">@{{ f.name }}</a><br>
                       <small class="text-muted">{{ f.bio|default:"No bio available." }}</small>
@@ -219,21 +201,18 @@
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title">{{ user.name }}'s Following</h5>
-                <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
               </div>
               <div class="modal-body">
                 {% if following %}
                 <ul class="list-group">
                   {% for f in following %}
-                  <li class="list-group-item d-flex gap-3 align-items-center">
-                    <a href="{% url 'public_profile' f.id %}">
-                      {% if f.profile_image %}
-                      <img src="{{ f.profile_image.url }}" width="40" height="40" class="rounded-circle"
-                        style="object-fit: cover;">
-                      {% else %}
-                      <img src="{% static 'default_profile.png' %}" width="40" height="40" class="rounded-circle">
-                      {% endif %}
-                    </a>
+                  <li class="list-group-item d-flex align-items-center gap-3">
+                    {% if f.profile_image %}
+                      <img src="{{ f.profile_image.url }}" width="40" height="40" class="rounded-circle" style="object-fit: cover;">
+                    {% else %}
+                      <img src="{% static 'dashboard/images/default-profile-icon.jpg' %}" width="40" height="40" class="rounded-circle">
+                    {% endif %}
                     <div>
                       <a href="{% url 'public_profile' f.id %}" class="fw-bold text-decoration-none">@{{ f.name }}</a><br>
                       <small class="text-muted">{{ f.bio|default:"No bio available." }}</small>

@@ -20,9 +20,9 @@ urlpatterns = [
     path('forgot_password/', views.forgot_password, name='forgot_password'),
     path('reset_password/', views.reset_password, name='reset_password'),
     path('reset-password/', views.reset_password, name='reset_password'),
-    path('like/<int:doc_id>/', views.toggle_like, name='toggle_like'),
     path('comment/<int:doc_id>/', views.add_comment, name='add_comment'),
-    path('explore/', views.explore, name='explore'),
+    path('explore_profile/', views.explore_profile, name='explore_profile'),
+    path('explore_docs/', views.explore_docs, name='explore_docs'),
     path('follow/<int:user_id>/', views.toggle_follow, name='toggle_follow'),
     path('logout/',views.logout,name='logout'),
     
