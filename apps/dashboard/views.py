@@ -26,7 +26,6 @@ from .context_processors import current_user  # If you're using this manually
 # ================================
 
 from django.core.serializers.json import DjangoJSONEncoder
-from django.http import JsonResponse
 import json
 
 # In your context (for index or explore view)
@@ -222,7 +221,9 @@ def logout(request):
 # ================================
 
 @login_required
-def index(request):
+
+
+def index(request): 
     user_id = request.session.get('user_id')
     current_user = User.objects.get(id=user_id)
 
@@ -233,6 +234,7 @@ def index(request):
     random.shuffle(users)
     random.shuffle(documents)
 
+    # ✅ Prepare comment data JSON for each document
     for doc in documents:
         doc.comment_data = json.dumps([
             {
@@ -243,6 +245,7 @@ def index(request):
             for c in doc.comments.all()
         ], cls=DjangoJSONEncoder)
 
+    # ✅ Then render template
     return render(request, 'dashboard/index.html', {
         'users': users[:10],
         'documents': documents[:10],
