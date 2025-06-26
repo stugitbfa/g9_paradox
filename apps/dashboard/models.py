@@ -24,7 +24,6 @@ class User(models.Model):
     bio = models.TextField(blank=True, null=True)
     profile_image = models.ImageField(upload_to='profile_images/',blank=True, null=True)
     
-    from django.db import models
 
 
     
@@ -40,8 +39,8 @@ class Document(models.Model):
     
     
 class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     document = models.ForeignKey(Document, related_name='comments', on_delete=models.CASCADE)
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     

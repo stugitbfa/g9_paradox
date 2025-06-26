@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth.hashers import make_password, check_password
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User as DjangoUser  # Avoid confusion with custom User
 from functools import wraps
 import random
@@ -28,8 +27,36 @@ from .context_processors import current_user  # If you're using this manually
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from django.http import JsonResponse
+from .models import Document, Comment
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import Document, Comment 
 
 # In your context (for index or explore view)
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Document, Comment, User  # your custom User model
+
+from django.http import JsonResponse
+
+@login_required
+def add_comment(request, doc_id):
+    if request.method == 'POST':
+        user = User.objects.get(id=request.session['user_id'])  # or however you're storing user
+        document = get_object_or_404(Document, id=doc_id)
+        text = request.POST.get('comment', '').strip()
+        if text:
+            comment = Comment.objects.create(user=user, document=document, text=text)
+            return JsonResponse({
+                'user': comment.user.name,
+                'text': comment.text,
+                'created_at': comment.created_at.strftime('%b %d %H:%M')
+            })
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+
 
 
 def login_required(view_func):
@@ -50,23 +77,6 @@ def login_required(view_func):
 
 
 
-
-@login_required
-def add_comment(request, doc_id):
-    if request.method == 'POST':
-        doc = get_object_or_404(Document, id=doc_id)
-        
-        # ✅ Get user object from session manually
-        user_id = request.session.get('user_id')
-        if not user_id:
-            return redirect('login')  # or show error
-
-        user = User.objects.get(id=user_id)
-
-        # ✅ Create comment
-        Comment.objects.create(user=user, document=doc, text=request.POST['comment'])
-
-        return redirect(request.POST.get('next', 'explore_docs'))
 
 
 def sign_in(request):
@@ -223,8 +233,6 @@ def logout(request):
 # ================================
 
 @login_required
-
-
 def index(request): 
     user_id = request.session.get('user_id')
     current_user = User.objects.get(id=user_id)
