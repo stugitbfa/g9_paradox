@@ -38,9 +38,6 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Document, Comment, User  # your custom User model
 
-from django.http import JsonResponse
-
-@login_required
 def add_comment(request, doc_id):
     if request.method == 'POST':
         user = User.objects.get(id=request.session['user_id'])  # or however you're storing user
@@ -54,7 +51,6 @@ def add_comment(request, doc_id):
                 'created_at': comment.created_at.strftime('%b %d %H:%M')
             })
     return JsonResponse({'error': 'Invalid request'}, status=400)
-
 
 
 

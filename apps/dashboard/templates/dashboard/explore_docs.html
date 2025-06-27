@@ -81,22 +81,28 @@
     {% for doc in documents %}
     <div class="col-md-4 mb-4 d-flex">
       <div class="card doc-card w-100">
-        <img src="{% if doc.thumbnail %}{{ doc.thumbnail.url }}{% else %}{% static 'dashboard/images/default-thumbnail.png' %}{% endif %}"
-          class="card-img-top doc-trigger"
-          data-id="{{ doc.id }}"
-          data-file="{{ doc.file.url }}"
-          data-title="{{ doc.title|escapejs }}"
-          data-description="{{ doc.description|escapejs }}"
-          data-user="{{ doc.user.name|escapejs }}"
+        <img
+          src="{% if doc.thumbnail %}{{ doc.thumbnail.url }}{% else %}{% static 'dashboard/images/default-thumbnail.png' %}{% endif %}"
+          class="card-img-top doc-trigger" data-id="{{ doc.id }}" {% if doc.file %} data-file="{{ doc.file.url }}" {%
+          else %} data-file="" {% endif %} data-title="{{ doc.title|escapejs }}"
+          data-description="{{ doc.description|escapejs }}" data-user="{{ doc.user.name|escapejs }}"
           data-comments='[{% for c in doc.comments.all %}{"user": "{{ c.user.name|escapejs }}", "text": "{{ c.text|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'>
 
         <div class="card-body d-flex flex-column">
           <h5 class="card-title text-purple">{{ doc.title }}</h5>
           <p class="card-text">{{ doc.description|default:"No description." }}</p>
-          <a href="{% url 'public_profile' doc.user.id %}" class="text-decoration-none fw-semibold text-purple mb-2 d-block">
+          <a href="{% url 'public_profile' doc.user.id %}"
+            class="text-decoration-none fw-semibold text-purple mb-2 d-block">
             @{{ doc.user.name }}
           </a>
-          <a href="{{ doc.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary mt-auto w-100">📄 View Document</a>
+          {% if doc.file %}
+          <a href="{{ doc.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary mt-auto w-100">📄 View
+            Document</a>
+          {% else %}
+          <p class="text-muted small">❌ No document available</p>
+          {% endif %}
+
+          Document</a>
         </div>
       </div>
     </div>
@@ -124,7 +130,8 @@
           <!-- Add Comment -->
           <form id="commentForm" method="post" action="">
             {% csrf_token %}
-            <input id="commentInput" type="text" name="comment" class="form-control form-control-sm mb-2" placeholder="Add a comment..." required>
+            <input id="commentInput" type="text" name="comment" class="form-control form-control-sm mb-2"
+              placeholder="Add a comment..." required>
             <button type="submit" class="btn btn-sm btn-secondary">Post</button>
           </form>
         </div>

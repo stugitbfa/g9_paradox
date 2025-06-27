@@ -8,7 +8,8 @@
 
   <!-- Header -->
   <div class="text-center mb-5">
-    <h2 class="fw-bold" style="background: linear-gradient(to right, #6a1b9a, #9c27b0); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+    <h2 class="fw-bold"
+      style="background: linear-gradient(to right, #6a1b9a, #9c27b0); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
       ParaDox User Profile
     </h2>
   </div>
@@ -19,8 +20,8 @@
     <img src="{{ user_profile.profile_image.url }}" alt="Profile Image" class="rounded-circle shadow"
       style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #6a1b9a;">
     {% else %}
-    <img src="{% static 'dashboard/images/default-profile-icon.jpg' %}" alt="Default Image" class="rounded-circle shadow"
-      style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #6a1b9a;">
+    <img src="{% static 'dashboard/images/default-profile-icon.jpg' %}" alt="Default Image"
+      class="rounded-circle shadow" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #6a1b9a;">
     {% endif %}
   </div>
 
@@ -63,11 +64,14 @@
         </div>
         <div class="modal-body">
           {% for f in followers %}
-          <a href="{% url 'public_profile' f.id %}" class="d-flex align-items-center text-decoration-none text-dark mb-3">
+          <a href="{% url 'public_profile' f.id %}"
+            class="d-flex align-items-center text-decoration-none text-dark mb-3">
             {% if f.profile_image and f.profile_image.name %}
-            <img src="{{ f.profile_image.url }}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
+            <img src="{{ f.profile_image.url }}" class="rounded-circle me-2" width="40" height="40"
+              style="object-fit: cover;">
             {% else %}
-            <img src="{% static 'dashboard/images/default-profile-icon.jpg' %}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
+            <img src="{% static 'dashboard/images/default-profile-icon.jpg' %}" class="rounded-circle me-2" width="40"
+              height="40" style="object-fit: cover;">
             {% endif %}
             <div>
               <strong>@{{ f.name }}</strong><br>
@@ -92,11 +96,14 @@
         </div>
         <div class="modal-body">
           {% for f in following %}
-          <a href="{% url 'public_profile' f.id %}" class="d-flex align-items-center text-decoration-none text-dark mb-3">
+          <a href="{% url 'public_profile' f.id %}"
+            class="d-flex align-items-center text-decoration-none text-dark mb-3">
             {% if f.profile_image and f.profile_image.name %}
-            <img src="{{ f.profile_image.url }}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
+            <img src="{{ f.profile_image.url }}" class="rounded-circle me-2" width="40" height="40"
+              style="object-fit: cover;">
             {% else %}
-            <img src="{% static 'dashboard/images/default-profile-icon.jpg' %}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
+            <img src="{% static 'dashboard/images/default-profile-icon.jpg' %}" class="rounded-circle me-2" width="40"
+              height="40" style="object-fit: cover;">
             {% endif %}
             <div>
               <strong>@{{ f.name }}</strong><br>
@@ -122,12 +129,18 @@
         {% if doc.thumbnail %}
         <img src="{{ doc.thumbnail.url }}" class="card-img-top rounded-top-3" style="height: 200px; object-fit: cover;">
         {% else %}
-        <img src="{% static 'dashboard/images/default_thumbnail.png' %}" class="card-img-top rounded-top-3" style="height: 200px; object-fit: cover;">
+        <img src="{% static 'dashboard/images/default_thumbnail.png' %}" class="card-img-top rounded-top-3"
+          style="height: 200px; object-fit: cover;">
         {% endif %}
         <div class="card-body">
           <h5 class="card-title">{{ doc.title }}</h5>
           <p class="card-text text-muted">{{ doc.description|default:"No description provided." }}</p>
-          <a href="{{ doc.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
+          {% if doc.file %}
+          <a href="{{ doc.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary">📄 View</a>
+          {% else %}
+          <span class="text-muted small">No file available</span>
+          {% endif %}
+
           <a href="{{ doc.file.url }}" class="btn btn-sm btn-warning ms-2" download>Download</a>
         </div>
       </div>
