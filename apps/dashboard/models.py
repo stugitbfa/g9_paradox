@@ -44,7 +44,10 @@ class Comment(models.Model):
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     
-
     def __str__(self):
-        return self.file.name
+        return f"{self.user.name} on {self.document.title}" 
+    
+
+    # def __str__(self):
+    #     return self.file.name
 

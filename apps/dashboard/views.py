@@ -438,3 +438,12 @@ def search(request):
         'query': query,
         'current_user': current_user,
     })
+
+def terms(request):
+    return render(request, 'dashboard/terms.html')
+
+def about_us(request):
+    return render(request, 'dashboard/about_us.html')
+
+def contact_us(request):
+    return render(request, 'dashboard/contact_us.html')
