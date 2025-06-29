@@ -51,7 +51,6 @@
           class="card-img-top doc-trigger" style="cursor: pointer;" data-id="{{ doc.id }}" {% if doc.file %}
           data-file="{{ doc.file.url }}" {% else %} data-file="" {% endif %} data-title="{{ doc.title|escapejs }}"
           data-description="{{ doc.description|escapejs }}" data-user="{{ doc.user.name|escapejs }}"
-          data-likes="{{ doc.likes.count }}"
           data-comments='[{% for c in doc.comments.all %}{"user": "{{ c.user.name|escapejs }}", "text": "{{ c.text|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'>
         <div class="card-body">
           <h5 class="card-title fw-semibold">{{ doc.title }}</h5>
