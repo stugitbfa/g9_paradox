@@ -38,6 +38,20 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Document, Comment, User  # your custom User model
 
+from django.http import Http404
+
+def view_document(request, doc_id):
+    try:
+        doc = Document.objects.get(id=doc_id)
+    except Document.DoesNotExist:
+        raise Http404("Document not found")
+
+    return render(request, 'dashboard/view_document.html', {
+        'doc': doc,
+        'comments': doc.comments.all()
+    })
+
+
 def add_comment(request, doc_id):
     if request.method == 'POST':
         user = User.objects.get(id=request.session['user_id'])  # or however you're storing user

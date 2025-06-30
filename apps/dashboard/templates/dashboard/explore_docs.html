@@ -98,11 +98,14 @@
           {% if doc.file %}
           <a href="{{ doc.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary mt-auto w-100">📄 View
             Document</a>
+              <button class="btn btn-sm btn-outline-success mt-2 copy-link-btn" data-link="{% url 'view_document' doc.id %}">
+          🔗 Copy Share Link
+        </button>
           {% else %}
           <p class="text-muted small">❌ No document available</p>
           {% endif %}
 
-          Document</a>
+         
         </div>
       </div>
     </div>
@@ -139,6 +142,22 @@
     </div>
   </div>
 </div>
+
+<script>
+  document.querySelectorAll('.copy-link-btn').forEach(button => {
+    button.addEventListener('click', function () {
+      const link = window.location.origin + this.dataset.link;
+
+      navigator.clipboard.writeText(link).then(() => {
+        // Optional: show a toast or alert
+        alert("Link copied to clipboard!");
+      }).catch(err => {
+        console.error("Failed to copy: ", err);
+        alert("Failed to copy link.");
+      });
+    });
+  });
+</script>
 
 <script>
   document.querySelectorAll('.doc-trigger').forEach(el => {
